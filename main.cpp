@@ -7,7 +7,13 @@ using namespace std;
 
 int main() {
 
-	videoStream(1,"output.mov");
+	bool video;
+	video = videoStream();
+
+	if(video){
+		addition();
+	}
 
 	return 0;
+
 }

@@ -13,6 +13,7 @@
 #include "opencv2/videoio.hpp"
 
 #include <signal.h>
+#include <stdio.h>
 #include <iostream>
 #include <unistd.h>
 
@@ -20,8 +21,8 @@ using namespace cv;
 using namespace std;
 
 
-void videoStream(int cam, string name);
+bool videoStream();
 void signalHandler( int signum );
-
+void addition();
 
 #endif /* CAPTURE_H_ */
