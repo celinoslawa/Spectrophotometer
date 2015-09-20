@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 	 	using namespace cv;
-
+	 	using namespace std;
 	  	void maching();
 
 #endif /* DETECT_H_ */

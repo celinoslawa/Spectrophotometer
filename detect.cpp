@@ -14,40 +14,44 @@
 
 
 void maching( ){
-	//char *argv[3]={0, "Rainbow.jpg","/Obrazy/templates/temp2.jpg"};
+
 
 	Mat img;
+	Mat gray_image;
 	Mat templ;
 	Mat result;
 
 	  // Load image and template
-	  img = imread( "Rainbow.jpg", 1 );
-	  templ = imread( "temp2.jpg", 1 );
+	img = imread( "Rainbow.jpg");
+	templ = imread( "temp2.jpg" );
 
-	  	namedWindow( "Calibration", WINDOW_AUTOSIZE );
-	  	namedWindow( "Finder", WINDOW_AUTOSIZE );
+	namedWindow( "Calibration", WINDOW_AUTOSIZE );
+	namedWindow( "Finder", WINDOW_AUTOSIZE );
 
-	  	Mat img_display;
-	  	img.copyTo( img_display );
+  	Mat img_display;
+	img.copyTo( img_display );
+	cvtColor( img_display, gray_image, COLOR_BGR2GRAY );
+	int result_cols =  img.cols - templ.cols + 1;
+	int result_rows = img.rows - templ.rows + 1;
 
-	  	int result_cols =  img.cols - templ.cols + 1;
-	  	int result_rows = img.rows - templ.rows + 1;
+	result.create( result_rows, result_cols, img.type() ); // 32F
+	matchTemplate( img, templ, result, CV_TM_CCOEFF );
+	normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+    double minVal; double maxVal; Point minLoc; Point maxLoc;
+	Point matchLoc;
 
-	  	result.create( result_rows, result_cols, img.type() ); // 32F
-	  	 // cout >>  dst.type();
-	  	matchTemplate( img, templ, result, CV_TM_CCOEFF );
-	  	normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
+	minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc);
+	matchLoc = maxLoc;
 
-	      double minVal; double maxVal; Point minLoc; Point maxLoc;
-	  	Point matchLoc;
 
-	  	minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc);
+	rectangle(img_display , matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar( 0, 0, 255   ), 2, 8, 0 );
+	Mat D (gray_image, Rect(matchLoc.x, matchLoc.y, templ.cols, templ.rows ) );
+	imshow( "Finder" , img_display );
 
-	  	matchLoc = maxLoc;
+	cout << "D = " << endl << " " << D << endl << endl;
+	imshow( "Calibration" , D );
 
-	  	rectangle( img , matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar( 0, 0, 255   ), 2, 8, 0 );
-	  	imshow( "Finder" , img );
-	  	imshow( "Calibration" , result );
-	  	waitKey(0);
+	waitKey(0);
 }
+
 
