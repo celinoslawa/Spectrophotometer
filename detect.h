@@ -17,6 +17,9 @@
 	 	using namespace cv;
 	 	using namespace std;
 	  	void maching();
+	  	uchar varianceRGB(uchar b, uchar g, uchar r);
+	  	void  Matvariance();
+
 
 #endif /* DETECT_H_ */
 
