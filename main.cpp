@@ -1,11 +1,12 @@
 
 #include"capture.h"
+#include "detect.h"
 
 using namespace cv;
 using namespace std;
 
+int main(int argc, char** argv ) {
 
-int main() {
 
 	bool video;
 	video = videoStream();
@@ -14,6 +15,11 @@ int main() {
 		addition();
 	}
 
+
+	//maching();
+	Matvariance();
+
 	return 0;
 
 }
+

@@ -15,14 +15,7 @@ void signalHandler( int signum){
 
 bool videoStream(){
 
-	//VideoCapture stream0(0);
-	VideoCapture stream1(0);   //0 is the id of video device.0 if you have only one camera.
-
-	/*if (!stream0.isOpened()) { //check if video device has been initialised
-		cout << "cannot open camera";
-		exit(-1);
-		return false;
-	}*/
+	VideoCapture stream1(1);   //0 is the id of video device.0 if you have only one camera.
 
 	if (!stream1.isOpened()) { //check if video device has been initialised
 		cout << "cannot open camera";
@@ -72,7 +65,7 @@ bool videoStream(){
                             sprintf(filename,"filename%.3d.jpg",n++);
                             imwrite(filename,frame);
                             cout << "Saved " << filename << endl;
-                            if(n==4){
+                            if(n==10){
                             	return true;
                             }
                             break;
@@ -92,32 +85,66 @@ void addition(){
 
 	double alpha = 0.5;
 	double beta;
-	Mat src1, src2, src3, src4, dst;
+	Mat src1, src2, src3, src4, src5, src6, src7, src8, src9, src10, dst;
 
 	src1 = imread("filename000.jpg");
 	src2 = imread("filename001.jpg");
 	src3 = imread("filename002.jpg");
 	src4 = imread("filename003.jpg");
+	src5 = imread("filename004.jpg");
+	src6 = imread("filename005.jpg");
+	src7 = imread("filename006.jpg");
+	src8 = imread("filename007.jpg");
+	src9 = imread("filename008.jpg");
+	src10 = imread("filename009.jpg");
+
 
 	if( !src1.data ) {
-		printf("Error loading src1 \n");
+		printf("Error loading filename000.jpg \n");
 		exit(-1);
 	}
 	if( !src2.data ) {
-		printf("Error loading src2 \n");
+		printf("Error loading filename001.jpg \n");
 		exit(-1);
 	}
 
+
 	if( !src3.data ) {
-		printf("Error loading src2 \n");
+		printf("Error loading filename002.jpg \n");
 		exit(-1);
 	}
 
 	if( !src4.data ) {
-		printf("Error loading src2 \n");
+		printf("Error loading filename003.jpg \n");
 		exit(-1);
 	}
 
+	if( !src5.data ) {
+		printf("Error loading filename004.jpg \n");
+		exit(-1);
+	}
+	if( !src6.data ) {
+		printf("Error loading filename005.jpg \n");
+		exit(-1);
+	}
+
+	if( !src7.data ) {
+		printf("Error loading filename006.jpg \n");
+		exit(-1);
+	}
+	if( !src8.data ) {
+		printf("Error loading filename007.jpg \n");
+		exit(-1);
+	}
+
+	if( !src9.data ) {
+		printf("Error loading filename008.jpg\n");
+		exit(-1);
+	}
+	if( !src10.data ) {
+		printf("Error loading filename009.jpg \n");
+		exit(-1);
+	}
 	 /// Create Windows
 	 namedWindow("Rainbow", 1);
 	 beta = ( 1.0 - alpha );
@@ -125,6 +152,16 @@ void addition(){
 	 addWeighted( src1, alpha, src2, beta, 0.0, dst);
 	 addWeighted( dst, alpha, src3, beta, 0.0, dst);
 	 addWeighted( dst, alpha, src4, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src5, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src6, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src7, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src8, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src9, beta, 0.0, dst);
+	 addWeighted( dst, alpha, src10, beta, 0.0, dst);
+
+
+
+
 
 	 imwrite("Rainbow.jpg" ,dst);
 	 cout << "Saved " << "Rainbow.jpg"<< endl;
