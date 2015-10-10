@@ -11,51 +11,9 @@
 #include "detect.h"
 
 
-
-
-void maching( ){
-
-
-	Mat img;
-	Mat gray_image;
-	Mat templ;
-	Mat result;
-
-	  // Load image and template
-	img = imread( "Rainbow.jpg");
-	templ = imread( "temp2.jpg" );
-
-	namedWindow( "Calibration", WINDOW_AUTOSIZE );
-	namedWindow( "Finder", WINDOW_AUTOSIZE );
-
-  	Mat img_display;
-	img.copyTo( img_display );
-	cvtColor( img_display, gray_image, COLOR_BGR2GRAY );
-	int result_cols =  img.cols - templ.cols + 1;
-	int result_rows = img.rows - templ.rows + 1;
-
-	result.create( result_rows, result_cols, img.type() ); // 32F
-	matchTemplate( img, templ, result, CV_TM_CCOEFF );
-	normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );
-    double minVal; double maxVal; Point minLoc; Point maxLoc;
-	Point matchLoc;
-
-	minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc);
-	matchLoc = maxLoc;
-
-
-	rectangle(img_display , matchLoc, Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), Scalar( 0, 0, 255   ), 2, 8, 0 );
-	Mat D (img_display , Rect(matchLoc.x, matchLoc.y, templ.cols, templ.rows ) );
-	imshow( "Finder" , img_display );
-
-	cout << "D = " << endl << " " << D << endl << endl;
-	imshow( "Calibration" , D );
-
-	waitKey(0);
-}
-
-
-//return variance of red, green and blue values
+/*************** varianceRGB ************************
+ return variance of red, green and blue values
+ ****************************************************/
 uchar varianceRGB(uchar b, uchar g, uchar r){
 	uchar mean;
 	uchar variance;
@@ -70,7 +28,10 @@ uchar varianceRGB(uchar b, uchar g, uchar r){
 	return variance;
 }
 
-//Returns iterator from list with max value
+
+/*************** max_value ************************
+ Returns iterator from list with max value
+ **************************************************/
 list<int>::const_iterator max_value(list<int>::iterator first, list<int>::iterator last){
 	list<int>::const_iterator max = first;
 	for(list<int>::const_iterator p = first; p!=last; ++p){
@@ -81,7 +42,10 @@ list<int>::const_iterator max_value(list<int>::iterator first, list<int>::iterat
 	return max;
 }
 
-//Returns iterator from list with min value
+
+/*************** min_value ************************
+ Returns iterator from list with min value
+***************************************************/
 list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterator last){
 	list<int>::const_iterator min = first;
 	for(list<int>::const_iterator p = first; p!=last; ++p){
@@ -92,18 +56,59 @@ list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterat
 	return min;
 }
 
-//creae Mats in gray scale depending on the variance of R G B values,
-//thereunder function finds the rainbow
+
+/*************** createcfgFile ************************
+ Creates config file with rainbow position
+*******************************************************/
+void createcfgFile(int x1, int y1, int x2, int y2){
+	static const char *output_file = "newconfig.cfg";
+	Config cfg;
+	Setting &root = cfg.getRoot();
+
+	// Add some settings to the configuration.
+	Setting &position = root.add("position", Setting::TypeGroup);
+
+	position.add("x1", Setting::TypeInt) = x1;
+	position.add("y1", Setting::TypeInt) = y1;
+	position.add("x2", Setting::TypeInt) = x2;
+	position.add("y2", Setting::TypeInt) = y2;
+
+	// Write out the new configuration.
+	  try
+	  {
+	    cfg.writeFile(output_file);
+	    cerr << "New configuration successfully written to: " << output_file
+	         << endl;
+
+	  }
+	  catch(const FileIOException &fioex)
+	  {
+	    cerr << "I/O error while writing file: " << output_file << endl;
+	    exit(-1);
+	  }
+
+}
+
+
+/*************** Matvariance ************************
+ Create Mats in gray scale depending on the variance
+ of R G B values, thereunder function finds the rainbow
+ *******************************************************/
 void  Matvariance(){
 	Mat img;
 	list <int>xList;
 	list <int>yList;
+	img = imread( "Rainbow.jpg");
 
 	namedWindow( "Variance Norm", WINDOW_AUTOSIZE );
 	namedWindow( "Variance", WINDOW_AUTOSIZE );
 	namedWindow( "Finder", WINDOW_AUTOSIZE );
 
-	img = imread( "Rainbow.jpg");
+	if( !img.data )
+	{
+		printf("Error loading Rainbow.jpg \n");
+		exit(-1);
+	}
 
 	int cols = img.cols;
 	int rows = img.rows;
@@ -112,39 +117,40 @@ void  Matvariance(){
 	Mat dstn(rows, cols,  CV_8UC1);
 	uchar var;
 
-
 	for(int y = 0; y < rows; y++)
 	{
-	    for(int x = 0; x < cols; x++){
+	    for(int x = 0; x < cols; x++)
+	    {
 	    	Vec3b color = img.at<Vec3b>(Point(x,y));
 	    	var=varianceRGB(color[0] ,color[1], color[2]);
 	    	dst.at<uchar>(Point(x,y)) = var;
-	    	if( var > 140 ){
+	    	if( var > 140 )
+	    	{
 	    		dstn.at<uchar>(Point(x,y)) = 255;
 	    		xList.push_back(x);
 	    		yList.push_back(y);
-	    		//cout << " POINT" << endl << " " << Point(x,y) << endl << endl;
 	    	}
-	    	else{
+	    	else
+	    	{
 	    		dstn.at<uchar>(Point(x,y)) = 0;
-
 	    	}
-
-
 	    }
 	}
 
 
-	Point location1;
-	Point location2;
 	list<int>::const_iterator x1 = min_value(xList.begin(), xList.end());
 	list<int>::const_iterator y1 = min_value(yList.begin(), yList.end());
 	list<int>::const_iterator x2 = max_value(xList.begin(), xList.end());
 	list<int>::const_iterator y2 = max_value(yList.begin(), yList.end());
+
+	Point location1;
+	Point location2;
 	location1.x = *x1;
 	location1.y = *y1;
 	location2.x = *x2;
 	location2.y = *y2;
+
+	createcfgFile(*x1 ,*y1, *x2, *y2);
 
 	cout << " POINT location1" << endl << " " << location1 << endl << endl;
 	cout << " POINT location2" << endl << " " << location2 << endl << endl;
@@ -165,6 +171,100 @@ void  Matvariance(){
 
 	waitKey(0);
 
-
 }
 
+void slopedetect(){
+
+	Mat img;
+	img = imread( "hough1.jpg");
+	static const char *output_file = "newconfig.cfg";
+	Config cfg;
+	namedWindow( "Src", WINDOW_AUTOSIZE );
+	namedWindow( "Slope", WINDOW_AUTOSIZE );
+
+
+	if( !img.data )
+	{
+		printf("Error loading Rainbow.jpg \n");
+		exit(-1);
+	}
+
+	  try
+	  {
+	    cfg.readFile("newconfig.cfg");
+	  }
+	  catch(const FileIOException &fioex)
+	  {
+	    cerr << "I/O error while reading file." << std::endl;
+	    exit(-1);
+	  }
+	  catch(const ParseException &pex)
+	  {
+	    cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+	              << " - " << pex.getError() << std::endl;
+	    exit(-1);
+	  }
+
+	  Setting &root = cfg.getRoot();
+	  int x1, y1, x2, y2;
+
+	  try
+	    {
+	      const Setting &position = root["position"];
+
+
+
+	        if(!(position.lookupValue("x1", x1)
+	             && position.lookupValue("y1", y1)
+	             && position.lookupValue("x2", x2)
+	             && position.lookupValue("y2", y2))){
+
+	        cout << "X1 " << x1 << endl;
+	        cout << "Y1 " << y1 << endl;
+	        cout << "X2 " << x1 << endl;
+	        cout << "Y2 " << x1 << endl;
+	        }
+
+	      cout << endl;
+	    }
+	    catch(const SettingNotFoundException &nfex)
+	    {
+	      // Ignore.
+	    }
+
+	    Point location1;
+	    Point location2;
+	    location1.x = x1;
+	    location1.y = y1;
+	    location2.x = x2;
+	    location2.y = y2;
+
+	    Mat D (img , Rect(location1 , location2) );
+	    Mat dst, cdst;
+	    Canny(D, dst, 50, 200, 3);
+	    cvtColor(dst, cdst, COLOR_GRAY2BGR);
+
+	    vector<Vec4i> lines;
+	     HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+	     for( size_t i = 0; i < lines.size(); i++ )
+	     {
+	       Vec4i l = lines[i];
+	       line( cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
+	     }
+
+	     imwrite("Slope.jpg" ,cdst);
+	     cout << "Saved " << "Slope.jpg"<< endl;
+	    imshow("Src", img);
+	    imshow("Slope", cdst);
+
+
+	    waitKey();
+
+
+
+
+
+
+
+
+}
