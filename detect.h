@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <iomanip>
+#include <fstream>
 
 	 	using namespace cv;
 	 	using namespace std;
@@ -27,8 +28,15 @@
 	  	list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterator last);
 	  	uchar varianceRGB(uchar b, uchar g, uchar r);
 	  	void createcfgFile(int x1, int y1, int x2, int y2);
+	  	int average(list<int>::iterator first, list<int>::iterator last);
+	  	int relativeError( int x1, int average);
 	  	void  Matvariance();
+	  	void cannydetect();
 	  	void slopedetect();
+	  	void hough();
+	  	void matching();
+	  	void compareMatching();
+
 
 
 #endif /* DETECT_H_ */
