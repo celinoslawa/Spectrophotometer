@@ -6,20 +6,19 @@ using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv ) {
-
-
-	bool video;
-	video = videoStream();
-
-	if(video){
-		addition();
+	bool video1;
+	video1 = videoStream();
+	if(video1){
+		addition("Rainbow.png");
 	}
 
-
-	//maching();
 	Matvariance();
+	filllingWhite();
+	canny();
+	lineDetect();
 
-	return 0;
+return(0);
 
 }
+
 

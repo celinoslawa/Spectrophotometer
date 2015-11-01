@@ -20,18 +20,24 @@
 #include <iomanip>
 #include <fstream>
 
+	    extern int xp1;
+	    extern int yp1;
+	    extern int xp2;
+        extern int yp2;
 	 	using namespace cv;
 	 	using namespace std;
 	 	using namespace libconfig;
 	  	void maching();
-	  	list<int>::const_iterator max_value(list<int>::iterator first,list<int>::iterator last);
-	  	list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterator last);
+	  	int max_value(vector<int>Vect);
+	  	int min_value(vector<int>Vect);
 	  	uchar varianceRGB(uchar b, uchar g, uchar r);
-	  	void createcfgFile(int x1, int y1, int x2, int y2);
+	  	void createcfgFile(float x1, float y1, float x2, float y2,float x3, float y3, float x4, float y4);
 	  	int average(list<int>::iterator first, list<int>::iterator last);
 	  	int relativeError( int x1, int average);
 	  	void  Matvariance();
-	  	void cannydetect();
+	  	void filllingWhite();
+	  	void canny();
+	  	void lineDetect();
 	  	void slopedetect();
 	  	void hough();
 	  	void matching();

@@ -10,6 +10,10 @@
 
 #include "detect.h"
 
+ int xp1;
+ int yp1;
+ int xp2;
+ int yp2;
 
 /*************** varianceRGB ************************
  return variance of red, green and blue values
@@ -30,13 +34,13 @@ uchar varianceRGB(uchar b, uchar g, uchar r){
 
 
 /*************** max_value ************************
- Returns iterator from list with max value
+ Returns max value from vector
  **************************************************/
-list<int>::const_iterator max_value(list<int>::iterator first, list<int>::iterator last){
-	list<int>::const_iterator max = first;
-	for(list<int>::const_iterator p = first; p!=last; ++p){
-		if(*max < *p){
-			max=p;
+int max_value(vector<int> Vect){
+	int max = Vect[0];
+	for(size_t i = 0; i < Vect.size(); i++ ){
+		if(max < Vect[i]){
+			max=Vect[i];
 		}
 	}
 	return max;
@@ -44,13 +48,13 @@ list<int>::const_iterator max_value(list<int>::iterator first, list<int>::iterat
 
 
 /*************** min_value ************************
- Returns iterator from list with min value
+ Returns min value from vector
 ***************************************************/
-list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterator last){
-	list<int>::const_iterator min = first;
-	for(list<int>::const_iterator p = first; p!=last; ++p){
-		if(*min > *p){
-			min=p;
+int min_value(vector<int>Vect){
+	int min = Vect[0];
+	for(size_t i = 0; i < Vect.size(); i++ ){
+		if(min > Vect[i]){
+			min=Vect[i];
 		}
 	}
 	return min;
@@ -59,8 +63,12 @@ list<int>::const_iterator min_value(list<int>::iterator first, list<int>::iterat
 
 /*************** createcfgFile ************************
  Creates config file with rainbow position
+ x1, y1 - top left point
+ x2, y2 - top right point
+ x3, y3 - lower right point
+ x4, y4 - lower left point
 *******************************************************/
-void createcfgFile(int x1, int y1, int x2, int y2){
+void createcfgFile(float x1, float y1, float x2, float y2,float x3, float y3, float x4, float y4){
 	static const char *output_file = "newconfig.cfg";
 	Config cfg;
 	Setting &root = cfg.getRoot();
@@ -68,10 +76,14 @@ void createcfgFile(int x1, int y1, int x2, int y2){
 	// Add some settings to the configuration.
 	Setting &position = root.add("position", Setting::TypeGroup);
 
-	position.add("x1", Setting::TypeInt) = x1;
-	position.add("y1", Setting::TypeInt) = y1;
-	position.add("x2", Setting::TypeInt) = x2;
-	position.add("y2", Setting::TypeInt) = y2;
+	position.add("x1", Setting::TypeFloat) = x1;
+	position.add("y1", Setting::TypeFloat) = y1;
+	position.add("x2", Setting::TypeFloat) = x2;
+	position.add("y2", Setting::TypeFloat) = y2;
+	position.add("x3", Setting::TypeFloat) = x1;
+	position.add("y3", Setting::TypeFloat) = y1;
+	position.add("x4", Setting::TypeFloat) = x2;
+	position.add("y4", Setting::TypeFloat) = y2;
 
 	// Write out the new configuration.
 	  try
@@ -167,65 +179,38 @@ void  Matvariance(){
     int relErrY[yList.size()];
     int rel= 0;
 
-
-	ofstream res2file;
-	res2file.open ("xlist.txt");
 	for(size_t xitr=0; xitr != xList.size(); xitr++)
 		{
 		rel = relativeError( xList[xitr], avX);
 		relErrX[xitr]= rel;
-		res2file <<"X = " << xList[xitr] <<"  RelErr = " << rel << endl;
-
 		}
-	res2file.close();
 
-	list<int>::iterator yitr;
-	ofstream res1file;
-	res1file.open ("ylist.txt");
 	for(size_t yitr = 0; yitr != yList.size(); yitr++)
 		{
 		relErrY[yitr]= relativeError( yList[yitr], avY);
-		res1file <<"Y = " <<  yList[yitr]<<"  RelErr = " << relErrY[yitr] << endl;
-
 		}
-	res1file.close();
-
-	vector <int>badpixels;
-
+	vector<int> xVal;
+	vector<int> yVal;
 	for(size_t n =0; n < yList.size(); n++){
 		if(relErrY[n] > 25 || relErrX[n] > 65 ){
 
 			dstn_relerr.at<uchar>(Point( xList[n], yList[n])) = 0;
+			//cout<< "xList  " << xList[n] << endl;
+
+		}else {
+			xVal.push_back(xList[n]);
+			yVal.push_back(yList[n]);
 
 		}
 	}
-/*
-	list<int>::const_iterator x1 = min_value(xList.begin(), xList.end());
-	list<int>::const_iterator y1 = min_value(yList.begin(), yList.end());
-	list<int>::const_iterator x2 = max_value(xList.begin(), xList.end());
-	list<int>::const_iterator y2 = max_value(yList.begin(), yList.end());
-
-	Point location1;
-	Point location2;
-	location1.x = *x1;
-	location1.y = *y1;
-	location2.x = *x2;
-	location2.y = *y2;
-
-	createcfgFile(*x1 ,*y1, *x2, *y2);
-
-	cout << " POINT location1" << endl << " " << location1 << endl << endl;
-	cout << " POINT location2" << endl << " " << location2 << endl << endl;
-
-
-	rectangle(dstn ,location1 , location2 , Scalar( 0, 0, 255   ), 2, 8, 0 );
-	Mat D (img , Rect(location1 , location2) );
-*/
+	 xp1 = min_value(xVal);
+	 yp1 = max_value(yVal);
+	 xp2 = max_value(xVal);
+	 yp2 = min_value(yVal);
+	//createcfgFile(x1 ,y1, x2, y2);
 	imshow( "Variance Norm", dstn );
 	imshow( "Variance", dst );
 	imshow( "RelErr", dstn_relerr );
-
-
 
 	imwrite("VarianceNE.png", dstn_relerr);
 	cout << "Saved VarianceNE.png"  << endl;
@@ -236,58 +221,277 @@ void  Matvariance(){
 	imwrite("Variance.png", dst);
 	cout << "Saved Variance.png"  << endl;
 
-
 	waitKey(0);
 
 }
 
-void cannydetect(){
+void filllingWhite(){
 	Mat img;
-	Mat canny;
-	vector <int>xWhitePixels;
-	vector <int>yWhitePixels;
 
 	img = imread( "VarianceNE.png");
-	namedWindow( "Canny", WINDOW_AUTOSIZE );
-	namedWindow( "Variance", WINDOW_AUTOSIZE );
-	namedWindow( "RelErr", WINDOW_AUTOSIZE );
-	//namedWindow( "Temlate", WINDOW_AUTOSIZE );
 
 	if( !img.data )
 	{
 		printf("Error loading VarianceNE.png \n");
 		exit(-1);
 	}
+	cout<< "Img type " << img.type() << endl;
+	Mat templ1( 4,4, img.type(), Scalar(255));
+	//cout<< templ1 << endl;
+	Mat res1;
 
-	int cols = img.cols;
+	namedWindow( "Result1", WINDOW_AUTOSIZE );
+	//namedWindow( "Result2", WINDOW_AUTOSIZE );
+
+	/// Do the Matching and Normalize
+	matchTemplate( img, templ1, res1, CV_TM_SQDIFF );
+	normalize( res1, res1, 0, 255, NORM_MINMAX, -1, Mat());
+
+
+	imwrite("Res1.png" ,res1);
+	cout << "Saved " << "Res1.png"<< endl;
+
+	imshow("Result1", res1);
+/*
+    Mat  dst, cdst;
+	Canny(res2, dst, 200, 200, 3);
+	cvtColor(dst, cdst, COLOR_GRAY2BGR);
+	imshow("Result2", dst);
+*/
+	/*
+	vector<Vec2f> lines;
+	HoughLines(cdst, lines, 1, CV_PI/180, 75, 0, 0 );
+
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+		float rho = lines[i][0], theta = lines[i][1];
+	    //cout << "Rho: " << rho << endl;
+		//cout << "Theta: " << theta << endl;
+		Point pt1, pt2;
+	    double a = cos(theta), b = sin(theta);
+	    cout << "a = " << a << endl;
+
+		if(a<1){
+		double x0 = a*rho, y0 = b*rho;
+	    pt1.x = cvRound(x0 + 1000*(-b));
+	    pt1.y = cvRound(y0 + 1000*(a));
+	    pt2.x = cvRound(x0 - 1000*(-b));
+		pt2.y = cvRound(y0 - 1000*(a));
+	    line( dst, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
+	    }
+	}
+
+	imwrite("Slope.png" ,cdst);
+	cout << "Saved " << "Slope.png"<< endl;
+	imshow("Canny", dst);
+*/
+	waitKey(0);
+}
+
+void canny(){
+	Mat img;
+	img = imread("Res1.png",CV_LOAD_IMAGE_GRAYSCALE);
+	if( !img.data )
+	{
+		printf("Error loading Res1.png \n");
+		exit(-1);
+	}
+	cout<< "img type" << img.type() << endl;
+
+	namedWindow( "Canny", WINDOW_AUTOSIZE );
+    int cols = img.cols;
     int rows = img.rows;
+	Mat res3(rows, cols, CV_8UC1);
 
-		Mat dst(rows, cols,  CV_8UC1);
-		Mat dstn(rows, cols,  CV_8UC1);
-		uchar var;
 
-		for(int y = 0; y < rows; y++)
+    	for(int y = 0; y < rows; y++)
+    	{
+    	    for(int x = 0; x < cols; x++)
+    	    {
+    	    	uchar color2 = img.at<uchar>(Point(x,y));
+
+    	    	if(  color2 > 1)
+    	    	{
+    	    		res3.at<uchar>(Point(x,y)) = 255;
+    	    	}
+    	    	else
+    	    	{
+    	    		res3.at<uchar>(Point(x,y)) = 0;
+    	    	}
+    	    }
+    	}
+
+    	Mat dst(cols, rows,CV_8UC1 );
+    	Mat cdst;
+    	 Canny(res3, dst, 50, 200, 3);
+
+    	 cvtColor(dst, cdst, COLOR_GRAY2BGR);
+
+    	 vector<Vec4i> lines;
+    	 HoughLinesP(dst, lines, 1, CV_PI/180, 15, 15, 15 );
+		for( size_t i = 0; i < lines.size(); i++ )
 		{
-		    for(int x = 0; x < cols; x++)
-		    {
-		    	Vec3b color = img.at<Vec3b>(Point(x,y));
-		    	if( color[0] >= 100 )
-		    	{
-		    		xWhitePixels.push_back(x);
-		    		yWhitePixels.push_back(y);
-		    	}
-		    }
+		  Vec4i l = lines[i];
+		  line( cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,255,255), 2, LINE_AA);//CV_AA
+		  //cout<< "PT1 = "<< l[0] << " " << l[1]<< endl;
+		  //cout<<"Pt2 = "<< l[2]<< "  "<<l[3] <<endl;
 		}
+/*
+		Mat cdst2;
+		cvtColor(cdst,cdst2, COLOR_BGR2GRAY);
+		vector<Vec2f> lines2;
+		HoughLines(cdst, lines2, 1, CV_PI/180, 15, 30, 10);
 
-		vector <int>HUpperX;
-		vector <int>HupperY;
+for( size_t i = 0; i < lines2.size(); i++ )
+{
+   float rho = lines2[i][0], theta = lines2[i][1];
+   Point pt1, pt2;
+   double a = cos(theta), b = sin(theta);
+   double x0 = a*rho, y0 = b*rho;
+   pt1.x = cvRound(x0 + 1000*(-b));
+   pt1.y = cvRound(y0 + 1000*(a));
+   pt2.x = cvRound(x0 - 1000*(-b));
+   pt2.y = cvRound(y0 - 1000*(a));
+   line( cdst2, pt1, pt2, Scalar(0,255,0), 1, LINE_AA);
+}*/
 
-		for(size_t n =0; n < xWhitePixels.size(); n++){
+    	  imwrite("Canny.png" ,cdst);
+    	  cout << "Saved " << "Canny.png"<< endl;
+    	  imshow("Canny", cdst);
+    	 // imshow("Canny2", cdst2);
+    	  waitKey(0);
+}
 
+void lineDetect(){
+	Mat img;
+	img = imread("Canny.png",CV_LOAD_IMAGE_GRAYSCALE);
+		if( !img.data )
+		{
+			printf("Error loading Canny.png \n");
+			exit(-1);
 		}
+		namedWindow( "Line detect", WINDOW_AUTOSIZE );
+		namedWindow( "Points", WINDOW_AUTOSIZE );
+	    int cols = img.cols;
+	    int rows = img.rows;
+		Mat dst, cdst;
+		Mat crosPoints( cols, rows,CV_8UC1 , Scalar(0));
+		//Canny(img, dst, 50, 200, 3);
+		cvtColor(img, cdst, COLOR_GRAY2BGR);
+		vector<Vec2f> lines;
+	  	vector<Point2f> Vlines1; //pionowe linie
+	  	vector<Point2f> Vlines2; //pionowe linie
+	  	vector<Point2f> Hlines1; // poziome linie
+	  	vector<Point2f> Hlines2; // poziome linie
+		HoughLines(img, lines, 1, CV_PI/180, 65 , 65, 40);//80
+
+		  for( size_t i = 0; i < lines.size(); i++ )
+		  {
+		     float rho = lines[i][0], theta = lines[i][1];
+		     Point2f pt1, pt2;
+		     double a = cos(theta), b = sin(theta);
+		     cout<< "a = " << a << "  b = " << b << endl;
+		     double x0 = a*rho, y0 = b*rho;
+		     pt1.x = cvRound(x0 + 1000*(-b));
+		     pt1.y = cvRound(y0 + 1000*(a));
+		     pt2.x = cvRound(x0 - 1000*(-b));
+		     pt2.y = cvRound(y0 - 1000*(a));
+		     if(a > 0.9888 || a < (-0.9888) ){
+		    	 line( cdst, pt1, pt2, Scalar(0,255,0), 1, LINE_AA);
+		    	 Vlines1.push_back(pt1);
+		    	 Vlines2.push_back(pt2);
+		     }else if(b > 0.9888 || b < (-0.9888) ){
+			     line( cdst, pt1, pt2, Scalar(0,0,255), 1, LINE_AA);
+		    	 Hlines1.push_back(pt1);
+		    	 Hlines2.push_back(pt2);
+		     }
+		  }
 
 
+		  vector<Point2f> Cpoints;
+		  Point2f x, d1, d2, r;
+		  for(size_t n = 0; n < Vlines1.size(); n++){
+			  for(size_t m = 0; m < Hlines1.size(); m++){
+				  x = Hlines1[m]-Vlines1[n];
+				  d1 = Vlines2[n] - Vlines1[n];
+				  d2 = Hlines2[m] - Hlines1[m];
 
+				  float cross = d1.x*d2.y - d1.y*d2.x;
+				  double t1 = (x.x * d2.y - x.y * d2.x)/cross;
+
+				  r = Vlines1[n] + d1 * t1;
+				  Cpoints.push_back(r);
+			  }
+		  }
+vector<int>xVal;
+vector<int>yVal;
+Point2f Pt;
+Point2f Pt1 = Cpoints[0];
+Point2f Pt2 = Cpoints[0];
+Point2f Pt3 = Cpoints[0];
+Point2f Pt4 = Cpoints[0];
+//createcfgFile(x1 ,y1, x2, y2);
+cout<< "xp1 = " << xp1 << endl;
+cout<< "xp2 = " << xp2 << endl;
+cout<< "yp1 = " << yp1 << endl;
+cout<< "yp2 = " << yp2 << endl;
+
+
+float avrx = (xp1+xp2)/2;
+float avry = (yp1+yp2)/2;
+
+
+		  for(size_t j = 0; j < Cpoints.size(); j++){
+			  Pt = Cpoints[j];
+			  crosPoints.at<uchar>( Pt ) = 125;
+
+			  if(Pt.x < avrx && Pt.y < avry){ //lewy gorny
+				  //cout<< "lewy gorny =" << Pt << endl;
+				  if(Pt.x < Pt1.x || Pt.y < Pt1.y ){
+					  Pt1 = Pt;
+					  crosPoints.at<uchar>( Pt ) = 255;
+				  }
+			  }
+			  if(Pt.x > avrx && Pt.y < avry){ // prawy gorny
+				 // cout<< "prawy gorny = " << Pt << endl;
+				  if(Pt.x > Pt2.x || Pt.y < Pt1.y ){
+					  Pt2= Pt;
+					  crosPoints.at<uchar>( Pt ) = 255;
+				  }
+			  }
+
+			  if(Pt.x < avrx && Pt.y > avry){ //lewy dolny
+				  if(Pt.x < Pt4.x || Pt.y > Pt4.y ){
+					  Pt4 = Pt;
+					  crosPoints.at<uchar>( Pt ) = 255;
+				  }
+			  }
+
+			  if(Pt.x > avrx && Pt.y > avry){ //prawy dolny
+				  if(Pt.x > Pt3.x || Pt.y > Pt3.y ){
+					  Pt3 = Pt;
+					  crosPoints.at<uchar>( Pt ) = 255;
+				  }
+			  }
+
+		  }
+
+		  createcfgFile( Pt1.x, Pt1.y, Pt2.x, Pt2.y, Pt3.x, Pt3.y, Pt4.x, Pt4.y);
+		  /*
+		  cout<< "P1 = " << Pt1 << endl;
+		  cout<< "P2 = " << Pt2 << endl;
+		  cout<< "P3 = " << Pt3 << endl;
+		  cout<< "P4 = " << Pt4 << endl;
+		  */
+
+		  imshow("Line detect",cdst);
+		  imshow("Points", crosPoints);
+		  imwrite("Points.png" ,crosPoints);
+		   cout << "Saved " << "Points.png"<< endl;
+		  imwrite("Lines.png" ,cdst);
+		   cout << "Saved " << "Lines.png"<< endl;
+
+		  waitKey(0);
 }
 
 
@@ -464,7 +668,7 @@ void hough(){
 
 	    	Mat vdst(rows, cols,  CV_8UC1);
 	    	Mat vdstn(rows, cols,  CV_8UC1);
-	    	uchar var;
+	    	//uchar var;
 /*
 	    	for(int y = 0; y < rows; y++)
 	    	{
