@@ -27,21 +27,18 @@
 	 	using namespace cv;
 	 	using namespace std;
 	 	using namespace libconfig;
-	  	void maching();
+
 	  	int max_value(vector<int>Vect);
 	  	int min_value(vector<int>Vect);
 	  	uchar varianceRGB(uchar b, uchar g, uchar r);
 	  	void createcfgFile(float x1, float y1, float x2, float y2,float x3, float y3, float x4, float y4);
-	  	int average(list<int>::iterator first, list<int>::iterator last);
 	  	int relativeError( int x1, int average);
 	  	void  Matvariance();
 	  	void filllingWhite();
 	  	void canny();
 	  	void lineDetect();
-	  	void slopedetect();
-	  	void hough();
-	  	void matching();
-	  	void compareMatching();
+	  	void transformation();
+
 
 
 

@@ -12,10 +12,11 @@ int main(int argc, char** argv ) {
 		addition("Rainbow.png");
 	}
 
-	Matvariance();
-	filllingWhite();
-	canny();
-	lineDetect();
+	//Matvariance();
+	//filllingWhite();
+	//canny();
+	//lineDetect();
+	transformation();
 
 return(0);
 
